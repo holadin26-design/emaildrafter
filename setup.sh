@@ -33,5 +33,5 @@ pm2 save
 echo ""
 echo "======================================================="
 echo "🎉 DEPLOYMENT COMPLETE!"
-echo "Your app is live at: http://87.99.139.116:3000"
+echo "Your app is live at: http://87.99.139.116:3005"
 echo "======================================================="
