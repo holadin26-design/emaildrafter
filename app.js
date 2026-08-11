@@ -110,18 +110,39 @@ Liam, Pulse Metrics, liam@pulse.io, featured on TechCrunch startup showcase`;
   }
 
   // --- ACCOUNTS MANAGEMENT ---
+  function normalizeAccount(acc) {
+    if (typeof acc === 'string') {
+      return {
+        email: acc.trim(),
+        password: '',
+        host: acc.endsWith('@gmail.com') ? 'imap.gmail.com' : 'imap.mail.yahoo.com',
+        port: 993
+      };
+    }
+    const email = (acc.email || acc.id || '').trim();
+    return {
+      email: email,
+      password: (acc.password || '').trim(),
+      host: acc.host || (email.endsWith('@gmail.com') ? 'imap.gmail.com' : 'imap.mail.yahoo.com'),
+      port: acc.port || 993
+    };
+  }
+
   function loadSavedAccounts() {
     try {
-      const saved = localStorage.getItem('cold_email_imap_accounts');
+      const saved = localStorage.getItem('cold_email_imap_accounts') || localStorage.getItem('cold_email_accounts');
       if (saved) {
-        state.accounts = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          state.accounts = parsed.map(normalizeAccount).filter(a => a.email.length > 0);
+        }
       }
     } catch (e) {
       console.error('Failed to load accounts from localStorage', e);
     }
 
     if (!state.accounts || state.accounts.length === 0) {
-      state.accounts = [...SAMPLE_ACCOUNTS];
+      state.accounts = SAMPLE_ACCOUNTS.map(normalizeAccount);
     }
     renderAccounts();
   }
@@ -135,41 +156,56 @@ Liam, Pulse Metrics, liam@pulse.io, featured on TechCrunch startup showcase`;
     renderAccounts();
   }
 
-  function addAccount(email, password) {
-    const cleanEmail = email.trim();
-    if (!cleanEmail) return;
-    
-    const existingIdx = state.accounts.findIndex(a => a.email === cleanEmail);
+  function addAccount(emailVal, passVal) {
+    const emailEl = document.getElementById('account-email-input');
+    const passEl = document.getElementById('account-pass-input');
+
+    const cleanEmail = (emailVal !== undefined ? emailVal : (emailEl ? emailEl.value : '')).trim();
+    const cleanPass = (passVal !== undefined ? passVal : (passEl ? passEl.value : '')).trim();
+
+    if (!cleanEmail) {
+      showToast('Please enter an email address.', 'info');
+      return;
+    }
+
+    const existingIdx = state.accounts.findIndex(a => a.email.toLowerCase() === cleanEmail.toLowerCase());
     if (existingIdx >= 0) {
-      state.accounts[existingIdx].password = password.trim();
-      showToast(`Updated credentials for ${cleanEmail}`, 'info');
+      state.accounts[existingIdx].password = cleanPass;
+      showToast(`Updated password for ${cleanEmail}`, 'info');
     } else {
       state.accounts.push({
         email: cleanEmail,
-        password: password.trim(),
-        host: cleanEmail.endsWith('@gmail.com') ? 'imap.gmail.com' : 'imap.mail.yahoo.com',
+        password: cleanPass,
+        host: cleanEmail.toLowerCase().endsWith('@gmail.com') ? 'imap.gmail.com' : 'imap.mail.yahoo.com',
         port: 993
       });
-      showToast(`Added ${cleanEmail}`, 'success');
+      showToast(`Added account ${cleanEmail}`, 'success');
     }
 
-    DOM.accountEmailInput.value = '';
-    DOM.accountPassInput.value = '';
+    if (emailEl) emailEl.value = '';
+    if (passEl) passEl.value = '';
     saveAccounts();
   }
 
   function removeAccount(index) {
     const removed = state.accounts.splice(index, 1);
     saveAccounts();
-    showToast(`Removed ${removed[0].email}`, 'info');
+    if (removed.length > 0) {
+      showToast(`Removed ${removed[0].email}`, 'info');
+    }
   }
 
   function renderAccounts() {
-    DOM.accountsCount.textContent = state.accounts.length;
-    DOM.accountsTagsList.innerHTML = '';
+    const countEl = document.getElementById('accounts-count') || DOM.accountsCount;
+    const listEl = document.getElementById('accounts-tags-list') || DOM.accountsTagsList;
+
+    if (countEl) countEl.textContent = state.accounts.length;
+    if (!listEl) return;
+
+    listEl.innerHTML = '';
 
     if (state.accounts.length === 0) {
-      DOM.accountsTagsList.innerHTML = `<span class="helper-text">No accounts added. Please add at least 1 sender account above.</span>`;
+      listEl.innerHTML = `<span class="helper-text">No accounts added. Please add at least 1 sender account above.</span>`;
       return;
     }
 
@@ -177,11 +213,11 @@ Liam, Pulse Metrics, liam@pulse.io, featured on TechCrunch startup showcase`;
       const chip = document.createElement('div');
       chip.className = 'account-chip';
       chip.innerHTML = `
-        <span>${escapeHTML(acc.email)} ${acc.password ? '🔑' : '⚠️ No pass'}</span>
+        <span>✉ ${escapeHTML(acc.email)} ${acc.password ? '🔑' : '⚠️ No pass'}</span>
         <button class="remove-account-btn" type="button" title="Remove account">&times;</button>
       `;
       chip.querySelector('.remove-account-btn').addEventListener('click', () => removeAccount(idx));
-      DOM.accountsTagsList.appendChild(chip);
+      listEl.appendChild(chip);
     });
   }
 
@@ -749,12 +785,36 @@ ${d.body}`;
 
   // --- EVENT LISTENERS ---
   function setupEventListeners() {
-    DOM.addAccountBtn.addEventListener('click', () => {
-      addAccount(DOM.accountEmailInput.value, DOM.accountPassInput.value);
-    });
+    const emailInput = document.getElementById('account-email-input') || DOM.accountEmailInput;
+    const passInput = document.getElementById('account-pass-input') || DOM.accountPassInput;
+    const addBtn = document.getElementById('add-account-btn') || DOM.addAccountBtn;
+
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        addAccount();
+      });
+    }
+
+    if (emailInput) {
+      emailInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addAccount();
+        }
+      });
+    }
+
+    if (passInput) {
+      passInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addAccount();
+        }
+      });
+    }
 
     DOM.loadPresetAccountsBtn.addEventListener('click', () => {
-      state.accounts = [...SAMPLE_ACCOUNTS];
+      state.accounts = SAMPLE_ACCOUNTS.map(normalizeAccount);
       saveAccounts();
       showToast('Loaded 3 sample sender accounts', 'success');
     });
