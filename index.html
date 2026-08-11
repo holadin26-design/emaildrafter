@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cold Email Campaign Draft Generator — Multi-Account IMAP Engine</title>
+  <meta name="description" content="Generate personalized cold email campaigns distributed equally across multiple Gmail / Outlook IMAP accounts with direct Draft folder appends.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1>Cold Email Campaign Generator & IMAP Draft Engine</h1>
+          <p class="subtitle">Push personalized email drafts directly into real Gmail/Outlook Draft folders</p>
+        </div>
+      </div>
+      <div class="privacy-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>IMAP Engine Enabled</span>
+      </div>
+    </header>
+
+    <!-- Main Content Flow -->
+    <main class="main-content">
+
+      <!-- Section 1: Multi-Gmail Accounts Setup -->
+      <section class="card accounts-card">
+        <div class="card-header">
+          <div>
+            <h2><span class="step-num">1</span> Sender Accounts & IMAP Credentials</h2>
+            <span class="card-desc">Equal round-robin draft distribution across your connected sender accounts</span>
+          </div>
+          <button id="load-preset-accounts-btn" class="btn btn-ghost btn-sm" type="button">
+            Load Sample Accounts
+          </button>
+        </div>
+
+        <div class="grid-2 add-account-grid">
+          <div class="form-group">
+            <label for="account-email-input">Sender Email Address</label>
+            <input type="email" id="account-email-input" class="form-input" 
+              placeholder="e.g. alex@gmail.com or sales@company.com" 
+              autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="account-pass-input">App Password / Password (for IMAP Pushing)</label>
+            <input type="password" id="account-pass-input" class="form-input" 
+              placeholder="e.g. Google App Password (xxxx xxxx xxxx xxxx)" 
+              autocomplete="off">
+          </div>
+        </div>
+
+        <div class="margin-top-md flex-right">
+          <button id="add-account-btn" class="btn btn-secondary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Sender Account
+          </button>
+        </div>
+
+        <div class="accounts-list-wrapper margin-top-md">
+          <div class="accounts-label">Active Sender Accounts (<span id="accounts-count">0</span>):</div>
+          <div id="accounts-tags-list" class="accounts-tags-list">
+            <!-- Account pills rendered via JS -->
+          </div>
+        </div>
+      </section>
+      
+      <!-- Section 2: Global Variables -->
+      <section class="card config-card">
+        <div class="card-header">
+          <h2><span class="step-num">2</span> Global Campaign Variables</h2>
+          <span class="card-desc">Defaults used in email templates</span>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="value-prop-input">Value Proposition Sentence</label>
+            <input type="text" id="value-prop-input" class="form-input" 
+              value="We helped similar companies reduce client acquisition costs by 35% in 30 days." 
+              placeholder="Enter your key value prop statement...">
+          </div>
+          <div class="form-group">
+            <label for="sender-name-input">Sender Display Name</label>
+            <input type="text" id="sender-name-input" class="form-input" 
+              value="Alex Morgan" 
+              placeholder="e.g. Alex Morgan, VP of Growth">
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: CSV Data Input -->
+      <section class="card csv-card">
+        <div class="card-header">
+          <div class="title-with-badge">
+            <h2><span class="step-num">3</span> CSV Contact List</h2>
+            <span id="csv-status-badge" class="status-badge muted">Awaiting CSV</span>
+          </div>
+          <div class="actions-row">
+            <button id="load-sample-btn" class="btn btn-secondary btn-sm" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              Load Sample CSV
+            </button>
+            <label class="btn btn-secondary btn-sm file-upload-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Upload .csv File
+              <input type="file" id="csv-file-input" accept=".csv,text/csv" hidden>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="textarea-header">
+            <label for="csv-input">Paste CSV Data (First row must contain headers)</label>
+            <span id="csv-metrics" class="metrics-text">0 contacts detected</span>
+          </div>
+          <textarea id="csv-input" class="form-textarea monospace" rows="6" 
+            placeholder="first_name, company_name, email, trigger&#10;Sarah, Acme Corp, sarah@acme.com, expanding into EMEA&#10;David, TechFlow, david@techflow.io, funding announcement" 
+            spellcheck="false"></textarea>
+          <div class="helper-text">
+            Headers supported: <code>first_name</code>, <code>company_name</code>, <code>email</code>, <code>trigger</code>, or custom headers. Quoted values with commas handled.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Template Editor -->
+      <section class="card template-card">
+        <div class="card-header">
+          <h2><span class="step-num">4</span> Email Template Editor</h2>
+          <button id="reset-template-btn" class="btn btn-ghost btn-sm" type="button">Reset Default</button>
+        </div>
+
+        <!-- Available Tags Bar -->
+        <div class="tags-container">
+          <div class="tags-header">
+            <span class="tags-label">Click tag to insert at cursor position:</span>
+          </div>
+          <div id="tags-bar" class="tags-bar">
+            <!-- Dynamically populated via JS -->
+            <button type="button" class="tag-pill" data-tag="first_name">{{first_name}}</button>
+            <button type="button" class="tag-pill" data-tag="company_name">{{company_name}}</button>
+            <button type="button" class="tag-pill" data-tag="trigger">{{trigger}}</button>
+            <button type="button" class="tag-pill" data-tag="email">{{email}}</button>
+            <button type="button" class="tag-pill tag-pill-special" data-tag="assigned_account">{{assigned_account}}</button>
+            <button type="button" class="tag-pill tag-pill-special" data-tag="value_prop">{{value_prop}}</button>
+            <button type="button" class="tag-pill tag-pill-special" data-tag="sender_name">{{sender_name}}</button>
+          </div>
+        </div>
+
+        <div class="form-group margin-top-md">
+          <label for="template-subject">Subject Line</label>
+          <input type="text" id="template-subject" class="form-input monospace" 
+            value="Quick idea for {{company_name}}">
+        </div>
+
+        <div class="form-group margin-top-md">
+          <label for="template-body">Email Body Template</label>
+          <textarea id="template-body" class="form-textarea monospace" rows="9" spellcheck="false">Hi {{first_name}},
+
+Noticed {{company_name}} has been {{trigger}}.
+
+{{value_prop}}
+
+Worth a quick 15-min call to see if it's a fit?
+
+Best,
+{{sender_name}}</textarea>
+        </div>
+      </section>
+
+      <!-- Section 5: Action Bar -->
+      <div class="action-bar grid-2">
+        <button id="generate-btn" class="btn btn-primary btn-lg" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          Generate Preview & Links
+        </button>
+
+        <button id="save-imap-drafts-btn" class="btn btn-imap btn-lg" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          Save Drafts to Real IMAP Folders
+        </button>
+      </div>
+
+      <!-- Section 6: IMAP Draft Breakdown Widget (Shown after IMAP Push) -->
+      <section id="imap-breakdown-card" class="card breakdown-card hidden">
+        <div class="card-header">
+          <div class="title-with-badge">
+            <h2><span class="step-num step-num-success">✓</span> IMAP Draft Breakdown Widget</h2>
+            <span id="campaign-status-badge" class="status-badge active">Status: DRAFT</span>
+          </div>
+          <button id="launch-campaign-btn" class="btn btn-primary btn-sm" type="button">
+            🚀 Launch Campaign
+          </button>
+        </div>
+
+        <p class="card-desc margin-bottom-md">
+          Emails are sitting in each account's real <strong>Drafts</strong> folder — ready to send.
+        </p>
+
+        <div id="breakdown-list" class="breakdown-list">
+          <!-- Breakdown progress bars rendered by JS -->
+        </div>
+      </section>
+
+      <!-- Section 7: Generated Campaign Feed -->
+      <section id="output-section" class="card output-card hidden">
+        <div class="card-header output-header">
+          <div>
+            <h2><span class="step-num step-num-success">✓</span> Campaign Email Drafts Feed</h2>
+            <p id="drafts-count-text" class="card-desc">0 drafts created</p>
+          </div>
+          <div class="actions-row">
+            <button id="copy-visible-btn" class="btn btn-secondary" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy Visible Drafts
+            </button>
+            <button id="copy-all-btn" class="btn btn-secondary" type="button">
+              Copy All Drafts
+            </button>
+          </div>
+        </div>
+
+        <!-- Account Filter Tabs -->
+        <div class="account-filter-container">
+          <div id="account-filter-tabs" class="filter-tabs">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Scrollable Drafts Feed -->
+        <div id="drafts-list" class="drafts-feed">
+          <!-- Draft cards rendered here -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Cold Email Campaign Generator &bull; Multi-Account IMAP Engine &bull; RFC 822 Draft Appender</p>
+    </footer>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
