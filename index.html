@@ -905,9 +905,20 @@ body {
             <h2><span class="step-num">1</span> Sender Accounts & IMAP Credentials</h2>
             <span class="card-desc">Equal round-robin draft distribution across your connected sender accounts</span>
           </div>
-          <button id="load-preset-accounts-btn" class="btn btn-ghost btn-sm" type="button">
-            Load Sample Accounts
-          </button>
+          <div class="actions-row">
+            <button id="load-preset-accounts-btn" class="btn btn-ghost btn-sm" type="button">
+              Load 31 Preset Accounts
+            </button>
+            <label class="btn btn-ghost btn-sm file-upload-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Import Accounts CSV
+              <input type="file" id="accounts-csv-file-input" accept=".csv,text/csv" hidden>
+            </label>
+          </div>
         </div>
 
         <div class="grid-2 add-account-grid">

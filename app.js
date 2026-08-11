@@ -89,11 +89,39 @@ Marcus, CloudScale, marcus@cloudscale.net, scaling the engineering leadership te
 Jessica, Vantage Labs, jessica@vantage.co, opening a new Austin headquarters
 Liam, Pulse Metrics, liam@pulse.io, featured on TechCrunch startup showcase`;
 
-  // Sample Gmail Accounts
+  // Real Sender Gmail Accounts Preset List
   const SAMPLE_ACCOUNTS = [
-    { email: 'alex.morgan@gmail.com', password: '' },
-    { email: 'outreach.alex@gmail.com', password: '' },
-    { email: 'sales.alex@gmail.com', password: '' }
+    { email: 'cody.ridemarketing@gmail.com', password: 'ueqy rnys zvvh ilfv', senderName: 'Cody Franklin' },
+    { email: 'Brandon.dooutbound@gmail.com', password: 'kpvz xdzr uhqm dst', senderName: 'Brandon Hill' },
+    { email: 'steven.domarketing@gmail.com', password: 'dtyk dgwj symr ymis', senderName: 'Steven Tores' },
+    { email: 'Ethan.dooutbound@gmail.com', password: 'ruds uwdo ynpi oser', senderName: 'Ethan Parker' },
+    { email: 'colde.domarketing@gmail.com', password: 'abas oqtt rtjx lhgb', senderName: 'Cole Dawson' },
+    { email: 'derek.ridemarketing@gmail.com', password: 'mcqm fggp kyfp chpe', senderName: 'Derek Houston' },
+    { email: 'Kyle.ridemarketing@gmail.com', password: 'fnws fzuj tvhs ovbf', senderName: 'Kyle Brenan' },
+    { email: 'Daniel.dooutbound@gmail.com', password: 'ewnq hjhl ncta lkbz', senderName: 'Daniel Brooks' },
+    { email: 'Kyle.rdiemarketing@gmail.com', password: 'lpfz kduk ulsx bunk', senderName: 'Kyle' },
+    { email: 'liam.dooutbound@gmail.com', password: 'mvgl knxw uegk xjvg', senderName: 'Liam Parker' },
+    { email: 'tanner.dooutbound@gmail.com', password: 'mhfs epop xzsb bogj', senderName: 'Tanner Bishop' },
+    { email: 'colton.dooutbound@gmail.com', password: 'qcks qkte nshw dzho', senderName: 'Colton Reeves' },
+    { email: 'David.ridemarketing@gmail.com', password: 'gqbe ppfr wvmf ylfk', senderName: 'David Allen' },
+    { email: 'hughes.dooutbound@gmail.com', password: 'qrcs nwnw ngbz ggli', senderName: 'Evan Hughes' },
+    { email: 'justin.ridemarketing@gmail.com', password: 'pdrq nqqkfnvuliud', senderName: 'Justin Palmer' },
+    { email: 'Travis.dooutbound@gmail.com', password: 'bloh regt wmeg vqey', senderName: 'Travis Moore' },
+    { email: 'oliver.ridemarketing@gmail.com', password: 'ocuv tbwe cftd medx', senderName: 'Oliver Johnson' },
+    { email: 'garret.dooutbound@gmail.com', password: 'uben lqpk tfbq vgdo', senderName: 'Garrett Boone' },
+    { email: 'cody.dooutbound@gmail.com', password: 'mzlk mrco qlgk qrod', senderName: 'Cody Reynolds' },
+    { email: 'Chris.dooutbound@gmail.com', password: 'fqiz tzst oelw gaqa', senderName: 'Chris Benett' },
+    { email: 'Michael.ridemarketing@gmail.com', password: 'nvae ndko owzq zodk', senderName: 'Michael Stone' },
+    { email: 'jasonboosttt@gmail.com', password: 'rwds bqht xrvq ovkt', senderName: 'Jason Boost' },
+    { email: 'connorworkes@gmail.com', password: 'jjym wfvz orhf khkg', senderName: 'Connor Works' },
+    { email: 'william.ridemarketing@gmail.com', password: 'eftm otbi ccwj oibk', senderName: 'William Hughes' },
+    { email: 'owen.digitale@gmail.com', password: 'cquh lwug bdjn xmuo', senderName: 'Owen Digital' },
+    { email: 'samuelonlinee@gmail.com', password: 'zlsq gbie jjnu oeaf', senderName: 'Samuel Online' },
+    { email: 'David.dooutbound@gmail.com', password: 'eyjk dvmz bqbd fybn', senderName: 'David Harns' },
+    { email: 'garrett.dooutbound@gmail.com', password: 'xttp jxad mxpz yhqo', senderName: 'Garrett Boone' },
+    { email: 'Derek.dooutbound@gmail.com', password: 'acxp yfwx ruzu ckxs', senderName: 'Derek Kim' },
+    { email: 'Matthew.ridemarketing@gmail.com', password: 'kzdd lehs dcyj vusk', senderName: 'Mathew Baker' },
+    { email: 'brett.ridemarketing@gmail.com', password: 'fwkn iptm nnlj oufl', senderName: 'Brett Harmon' }
   ];
 
   // Initialize App
@@ -862,8 +890,32 @@ ${d.body}`;
     DOM.loadPresetAccountsBtn.addEventListener('click', () => {
       state.accounts = SAMPLE_ACCOUNTS.map(normalizeAccount);
       saveAccounts();
-      showToast('Loaded 3 sample sender accounts', 'success');
+      showToast(`Loaded ${SAMPLE_ACCOUNTS.length} sender accounts`, 'success');
     });
+
+    const accountsFileInput = document.getElementById('accounts-csv-file-input');
+    if (accountsFileInput) {
+      accountsFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const text = evt.target.result;
+          const { rows } = parseCSV(text);
+          let addedCount = 0;
+          rows.forEach(r => {
+            const email = getFieldValue(r, ['email', 'email_address', 'user', 'to']);
+            const pass = getFieldValue(r, ['app_password', 'password', 'pass', 'app_pass']);
+            if (email) {
+              addAccount(email, pass);
+              addedCount++;
+            }
+          });
+          showToast(`Imported ${addedCount} accounts from ${file.name}`, 'success');
+        };
+        reader.readAsText(file);
+      });
+    }
 
     DOM.csvInput.addEventListener('input', handleCSVUpdate);
     DOM.loadSampleBtn.addEventListener('click', () => {
