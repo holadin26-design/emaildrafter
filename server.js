@@ -287,7 +287,12 @@ app.get('/api/campaigns/:id', (req, res) => {
   return res.json({ success: true, campaign });
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`🚀 IMAP Draft Engine & SQL Database API running at http://localhost:${PORT}`);
-});
+// Export Express App for Vercel Serverless Function deployment
+module.exports = app;
+
+// Start local listener if run directly (not required by Vercel)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 IMAP Draft Engine API Server running at http://localhost:${PORT}`);
+  });
+}

@@ -1,0 +1,126 @@
+{
+  "accounts": [
+    {
+      "id": "alex.morgan@gmail.com",
+      "email": "alex.morgan@gmail.com",
+      "password": "",
+      "host": "imap.gmail.com",
+      "port": 993,
+      "created_at": "2026-08-11T22:17:54.178Z"
+    },
+    {
+      "id": "outreach.alex@gmail.com",
+      "email": "outreach.alex@gmail.com",
+      "password": "",
+      "host": "imap.gmail.com",
+      "port": 993,
+      "created_at": "2026-08-11T22:17:54.181Z"
+    },
+    {
+      "id": "sales.alex@gmail.com",
+      "email": "sales.alex@gmail.com",
+      "password": "",
+      "host": "imap.gmail.com",
+      "port": 993,
+      "created_at": "2026-08-11T22:17:54.183Z"
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "camp_1786486674145",
+      "title": "Campaign - 8/12/2026",
+      "status": "draft",
+      "draft_breakdown": [
+        {
+          "accountId": "alex.morgan@gmail.com",
+          "email": "alex.morgan@gmail.com",
+          "draftsAdded": 0,
+          "status": "failed_missing_password"
+        },
+        {
+          "accountId": "outreach.alex@gmail.com",
+          "email": "outreach.alex@gmail.com",
+          "draftsAdded": 0,
+          "status": "failed_missing_password"
+        },
+        {
+          "accountId": "sales.alex@gmail.com",
+          "email": "sales.alex@gmail.com",
+          "draftsAdded": 0,
+          "status": "failed_missing_password"
+        }
+      ],
+      "value_prop": "We helped similar companies reduce client acquisition costs by 35% in 30 days.",
+      "sender_name": "Alex Morgan",
+      "created_at": "2026-08-11T22:17:54.146Z"
+    }
+  ],
+  "leads": [
+    {
+      "id": "camp_1786486674145_lead_0",
+      "campaign_id": "camp_1786486674145",
+      "first_name": "Sarah",
+      "company_name": "Acme Corp",
+      "email": "sarah@acme.com",
+      "trigger_note": "expanding into the EMEA region",
+      "draft_account_id": null,
+      "status": "pending",
+      "created_at": "2026-08-11T22:17:54.146Z"
+    },
+    {
+      "id": "camp_1786486674145_lead_1",
+      "campaign_id": "camp_1786486674145",
+      "first_name": "David",
+      "company_name": "TechFlow",
+      "email": "david@techflow.io",
+      "trigger_note": "recent Series B funding announcement",
+      "draft_account_id": null,
+      "status": "pending",
+      "created_at": "2026-08-11T22:17:54.146Z"
+    },
+    {
+      "id": "camp_1786486674145_lead_2",
+      "campaign_id": "camp_1786486674145",
+      "first_name": "Elena",
+      "company_name": "Nexus AI",
+      "email": "elena@nexus.ai",
+      "trigger_note": "launching a new developer platform",
+      "draft_account_id": null,
+      "status": "pending",
+      "created_at": "2026-08-11T22:17:54.146Z"
+    },
+    {
+      "id": "camp_1786486674145_lead_3",
+      "campaign_id": "camp_1786486674145",
+      "first_name": "Marcus",
+      "company_name": "CloudScale",
+      "email": "marcus@cloudscale.net",
+      "trigger_note": "scaling the engineering leadership team",
+      "draft_account_id": null,
+      "status": "pending",
+      "created_at": "2026-08-11T22:17:54.146Z"
+    },
+    {
+      "id": "camp_1786486674145_lead_4",
+      "campaign_id": "camp_1786486674145",
+      "first_name": "Jessica",
+      "company_name": "Vantage Labs",
+      "email": "jessica@vantage.co",
+      "trigger_note": "opening a new Austin headquarters",
+      "draft_account_id": null,
+      "status": "pending",
+      "created_at": "2026-08-11T22:17:54.146Z"
+    },
+    {
+      "id": "camp_1786486674145_lead_5",
+      "campaign_id": "camp_1786486674145",
+      "first_name": "Liam",
+      "company_name": "Pulse Metrics",
+      "email": "liam@pulse.io",
+      "trigger_note": "featured on TechCrunch startup showcase",
+      "draft_account_id": null,
+      "status": "pending",
+      "created_at": "2026-08-11T22:17:54.146Z"
+    }
+  ]
+}

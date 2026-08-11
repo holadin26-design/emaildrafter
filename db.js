@@ -1,46 +1,45 @@
 /**
- * Pure JavaScript File Database Engine (No C++ Native Bindings Required)
- * Stores tables: campaigns, leads, accounts matching the exact specification schema.
+ * Pure JavaScript Database Engine (Vercel Read-Only File System Compliant)
+ * Stores tables: campaigns, leads, accounts with in-memory & /tmp fallback for Vercel Serverless.
  */
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const DB_FILE = path.join(__dirname, 'campaigns.json');
+const isVercel = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+const DB_FILE = isVercel ? path.join(os.tmpdir(), 'campaigns.json') : path.join(__dirname, 'campaigns.json');
 
-// Initial Schema Structure
-const initialData = {
-  accounts: [], // [{ id, email, password, host, port, created_at }]
-  campaigns: [], // [{ id, title, status, draft_breakdown, value_prop, sender_name, created_at }]
-  leads: [] // [{ id, campaign_id, first_name, company_name, email, trigger_note, draft_account_id, status, created_at }]
+// In-Memory Fallback State for Serverless Cold Starts
+let memoryStore = {
+  accounts: [],
+  campaigns: [],
+  leads: []
 };
 
 function readDB() {
   try {
-    if (!fs.existsSync(DB_FILE)) {
-      fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
-      return initialData;
+    if (fs.existsSync(DB_FILE)) {
+      const raw = fs.readFileSync(DB_FILE, 'utf8');
+      memoryStore = JSON.parse(raw);
     }
-    const raw = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(raw);
   } catch (err) {
-    console.error('Error reading database file:', err);
-    return initialData;
+    console.warn('Vercel DB Read Warning (using memory store):', err.message);
   }
+  return memoryStore;
 }
 
 function writeDB(data) {
+  memoryStore = data;
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
   } catch (err) {
-    console.error('Error writing database file:', err);
+    // Read-only filesystem on Vercel - graceful fallback to memoryStore
+    console.warn('Vercel File System Read-Only (persisted in memory state):', err.message);
   }
 }
 
-console.log('💾 Database initialized cleanly at campaigns.json');
-
 module.exports = {
-  // Accounts
   upsertAccount(acc) {
     const data = readDB();
     const id = acc.id || acc.email;
@@ -74,7 +73,6 @@ module.exports = {
     return readDB().accounts.find(a => a.email === email);
   },
 
-  // Campaigns
   createCampaign({ id, title, status = 'draft', valueProp, senderName, leads = [] }) {
     const data = readDB();
     const now = new Date().toISOString();
@@ -82,7 +80,7 @@ module.exports = {
     const campaignObj = {
       id: id,
       title: title || `Campaign - ${new Date().toLocaleDateString()}`,
-      status: status, // 'draft' | 'paused' | 'running' | 'completed' | 'scheduled'
+      status: status,
       draft_breakdown: [],
       value_prop: valueProp || '',
       sender_name: senderName || '',
@@ -99,7 +97,7 @@ module.exports = {
         company_name: l.company_name || l.company || '',
         email: l.email,
         trigger_note: l.trigger || l.trigger_note || '',
-        draft_account_id: null, // Foreign Key to accounts.id
+        draft_account_id: null,
         status: 'pending',
         created_at: now
       });
