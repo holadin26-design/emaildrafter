@@ -276,10 +276,54 @@ body {
   gap: 16px;
 }
 
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
 @media (max-width: 640px) {
   .grid-2 {
     grid-template-columns: 1fr;
   }
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.metrics-row {
+  margin-top: 10px;
+}
+
+.metric-card {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 14px 10px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  font-family: var(--font-mono);
+}
+
+.metric-value.text-warning {
+  color: #f59e0b;
+}
+
+.metric-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-top: 4px;
 }
 
 .form-group {
@@ -1067,6 +1111,26 @@ Best,
             <button id="copy-all-btn" class="btn btn-secondary" type="button">
               Copy All Drafts
             </button>
+          </div>
+        </div>
+
+        <!-- Campaign Summary Metrics Row -->
+        <div id="campaign-metrics-row" class="grid-4 metrics-row margin-bottom-md">
+          <div class="metric-card">
+            <span class="metric-value" id="metric-total-leads">0</span>
+            <span class="metric-label">Unique Leads</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value" id="metric-total-accounts">0</span>
+            <span class="metric-label">Sender Accounts</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value" id="metric-lead-share">0 / acc</span>
+            <span class="metric-label">Avg Share / Account</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value text-warning" id="metric-duplicates-removed">0</span>
+            <span class="metric-label">Duplicates Filtered</span>
           </div>
         </div>
 

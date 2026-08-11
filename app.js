@@ -379,6 +379,42 @@ Liam, Pulse Metrics, liam@pulse.io, featured on TechCrunch startup showcase`;
     showToast(`Inserted ${tagString}`, 'info');
   }
 
+  // --- DEDUPLICATION & METRICS ---
+  function deduplicateRows(rows) {
+    const seen = new Set();
+    const unique = [];
+    let dupCount = 0;
+
+    rows.forEach(row => {
+      const email = (getFieldValue(row, ['email', 'email_address', 'to']) || '').trim().toLowerCase();
+      if (email) {
+        if (seen.has(email)) {
+          dupCount++;
+          return; // Skip duplicate email
+        }
+        seen.add(email);
+      }
+      unique.push(row);
+    });
+
+    return { uniqueRows: unique, duplicateCount: dupCount };
+  }
+
+  function updateMetricsDisplay(uniqueCount, dupCount) {
+    const totalLeadsEl = document.getElementById('metric-total-leads');
+    const totalAccountsEl = document.getElementById('metric-total-accounts');
+    const leadShareEl = document.getElementById('metric-lead-share');
+    const duplicatesRemovedEl = document.getElementById('metric-duplicates-removed');
+
+    const accCount = state.accounts.length || 1;
+    const avgShare = uniqueCount > 0 ? (uniqueCount / accCount).toFixed(1) : '0';
+
+    if (totalLeadsEl) totalLeadsEl.textContent = uniqueCount;
+    if (totalAccountsEl) totalAccountsEl.textContent = state.accounts.length;
+    if (leadShareEl) leadShareEl.textContent = `${avgShare}/acc`;
+    if (duplicatesRemovedEl) duplicatesRemovedEl.textContent = dupCount;
+  }
+
   // --- CLIENT-SIDE DRAFT GENERATION ---
   function generateCampaign() {
     const { rows } = parseCSV(DOM.csvInput.value);
@@ -392,6 +428,11 @@ Liam, Pulse Metrics, liam@pulse.io, featured on TechCrunch startup showcase`;
       return;
     }
 
+    // Deduplicate leads by email
+    const { uniqueRows, duplicateCount } = deduplicateRows(rows);
+
+    updateMetricsDisplay(uniqueRows.length, duplicateCount);
+
     const valueProp = DOM.valuePropInput.value.trim();
     const senderName = DOM.senderNameInput.value.trim();
     const rawSubject = DOM.templateSubject.value;
@@ -399,7 +440,7 @@ Liam, Pulse Metrics, liam@pulse.io, featured on TechCrunch startup showcase`;
 
     const drafts = [];
 
-    rows.forEach((row, idx) => {
+    uniqueRows.forEach((row, idx) => {
       const assignedAccObj = state.accounts[idx % state.accounts.length];
       const assignedAccount = assignedAccObj.email;
       
@@ -444,7 +485,12 @@ Liam, Pulse Metrics, liam@pulse.io, featured on TechCrunch startup showcase`;
     state.activeFilter = 'ALL';
 
     renderCampaignResults();
-    showToast(`Generated ${drafts.length} drafts across ${state.accounts.length} accounts!`, 'success');
+    
+    if (duplicateCount > 0) {
+      showToast(`Generated ${drafts.length} drafts (${duplicateCount} duplicate email filtered)`, 'success');
+    } else {
+      showToast(`Generated ${drafts.length} drafts distributed equally across ${state.accounts.length} accounts!`, 'success');
+    }
   }
 
   function getFieldValue(row, possibleKeys) {

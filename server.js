@@ -80,6 +80,18 @@ app.post('/api/campaigns', (req, res) => {
     });
   }
 
+  // Deduplicate leads by email address
+  const seenEmails = new Set();
+  const uniqueLeads = [];
+  leads.forEach(l => {
+    const em = (l.email || '').trim().toLowerCase();
+    if (em) {
+      if (seenEmails.has(em)) return; // Skip duplicate email!
+      seenEmails.add(em);
+    }
+    uniqueLeads.push(l);
+  });
+
   const campaignId = 'camp_' + Date.now();
   const status = draftMode ? 'draft' : 'running';
 
@@ -89,7 +101,7 @@ app.post('/api/campaigns', (req, res) => {
     status: status,
     valueProp: valueProp || '',
     senderName: senderName || '',
-    leads: leads
+    leads: uniqueLeads
   });
 
   return res.status(201).json({
