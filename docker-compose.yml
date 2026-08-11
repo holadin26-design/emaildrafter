@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  emaildrafter:
+    build: .
+    container_name: emaildrafter-app
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./campaigns.json:/app/campaigns.json
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
