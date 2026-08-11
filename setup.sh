@@ -1,25 +1,15 @@
 #!/bin/bash
-# 1-Click Hetzner Cloud Automated Deployment Script
+# 1-Click Hetzner Cloud Automated Deployment Script (PM2 Engine)
 
 set -e
 
 echo "🚀 Starting Hetzner Deployment for Cold Email Campaign Generator..."
 
-# Update system packages
-sudo apt-get update -y
-sudo apt-get install -y git curl docker.io docker-compose-v2
-
-# Start & Enable Docker
-sudo systemctl enable --now docker
-
-# Create working directory
 APP_DIR="/opt/emaildrafter"
-sudo mkdir -p $APP_DIR
-sudo chown -R $USER:$USER $APP_DIR
+mkdir -p $APP_DIR
 
-# Clone or pull latest repository
 if [ -d "$APP_DIR/.git" ]; then
-  echo "📦 Updating existing repository..."
+  echo "📦 Updating repository..."
   cd $APP_DIR
   git pull origin main
 else
@@ -28,13 +18,20 @@ else
   cd $APP_DIR
 fi
 
-# Build and launch Docker container
-echo "🐳 Launching Docker container..."
-docker compose down || true
-docker compose up -d --build
+echo "📦 Installing npm dependencies..."
+npm install
+
+echo "⚡ Configuring PM2 Process Manager..."
+if ! command -v pm2 &> /dev/null; then
+  npm install -g pm2
+fi
+
+pm2 delete email-drafter 2>/dev/null || true
+pm2 start ecosystem.config.js
+pm2 save
 
 echo ""
 echo "======================================================="
 echo "🎉 DEPLOYMENT COMPLETE!"
-echo "Your app is now live at: http://$(curl -s ifconfig.me):3000"
+echo "Your app is live at: http://87.99.139.116:3000"
 echo "======================================================="
