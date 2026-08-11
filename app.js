@@ -6,10 +6,8 @@
 (function () {
   'use strict';
 
-  // API Backend Config (Vercel Serverless or Local Node Server)
-  const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? 'http://localhost:3001/api' 
-    : '/api';
+  // API Backend Config (Served unified on same origin /api)
+  const API_BASE_URL = '/api';
 
   // State Management
   const state = {

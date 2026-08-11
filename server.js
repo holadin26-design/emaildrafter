@@ -10,11 +10,14 @@ const { ImapFlow } = require('imapflow');
 const MailComposer = require('nodemailer/lib/mail-composer');
 const DB = require('./db');
 
+const path = require('path');
+
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+app.use(express.static(path.join(__dirname)));
 
 /**
  * Utility: Auto-detect IMAP Drafts mailbox folder name
