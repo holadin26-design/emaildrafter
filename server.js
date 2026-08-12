@@ -99,6 +99,7 @@ app.post('/api/campaigns', (req, res) => {
     id: campaignId,
     title: title || `Cold Email Campaign - ${new Date().toLocaleDateString()}`,
     status: status,
+    template: template || {},
     valueProp: valueProp || '',
     senderName: senderName || '',
     leads: uniqueLeads
@@ -202,13 +203,13 @@ app.post('/api/campaigns/:id/save-drafts', async (req, res) => {
           sender_name: campaign.sender_name || account.senderName || user
         };
 
-        let subject = 'Quick idea for {{company_name}}';
-        let body = 'Hi {{first_name}},\n\nNoticed {{company_name}} has been {{trigger}}.\n\n{{value_prop}}\n\nBest,\n{{sender_name}}';
+        let subject = (campaign.template && campaign.template.subject) ? campaign.template.subject : 'Quick idea for {{company_name}}';
+        let body = (campaign.template && campaign.template.body) ? campaign.template.body : 'Hi {{first_name}},\n\nNoticed {{company_name}} has been {{trigger}}.\n\n{{value_prop}}\n\nBest,\n{{sender_name}}';
 
         Object.keys(context).forEach(k => {
           const regex = new RegExp(`{{\\s*${k}\\s*}}`, 'gi');
-          subject = subject.replace(regex, context[k]);
-          body = body.replace(regex, context[k]);
+          subject = subject.replace(regex, context[k] !== undefined ? context[k] : '');
+          body = body.replace(regex, context[k] !== undefined ? context[k] : '');
         });
 
         const rawMime = await buildRfc822Message({

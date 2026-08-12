@@ -73,7 +73,7 @@ module.exports = {
     return readDB().accounts.find(a => a.email === email);
   },
 
-  createCampaign({ id, title, status = 'draft', valueProp, senderName, leads = [] }) {
+  createCampaign({ id, title, status = 'draft', template, valueProp, senderName, leads = [] }) {
     const data = readDB();
     const now = new Date().toISOString();
 
@@ -81,6 +81,7 @@ module.exports = {
       id: id,
       title: title || `Campaign - ${new Date().toLocaleDateString()}`,
       status: status,
+      template: template || {},
       draft_breakdown: [],
       value_prop: valueProp || '',
       sender_name: senderName || '',
