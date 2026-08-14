@@ -1,6 +1,6 @@
 /**
  * Pure JavaScript Database Engine (Vercel Read-Only File System Compliant)
- * Stores tables: campaigns, leads, accounts with in-memory & /tmp fallback for Vercel Serverless.
+ * Stores tables: campaigns, leads, accounts, followups with in-memory & /tmp fallback for Vercel Serverless.
  */
 
 const fs = require('fs');
@@ -14,14 +14,18 @@ const DB_FILE = isVercel ? path.join(os.tmpdir(), 'campaigns.json') : path.join(
 let memoryStore = {
   accounts: [],
   campaigns: [],
-  leads: []
+  leads: [],
+  followups: []
 };
 
 function readDB() {
   try {
     if (fs.existsSync(DB_FILE)) {
       const raw = fs.readFileSync(DB_FILE, 'utf8');
-      memoryStore = JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      // Ensure followups collection exists on old data
+      if (!parsed.followups) parsed.followups = [];
+      memoryStore = parsed;
     }
   } catch (err) {
     console.warn('Vercel DB Read Warning (using memory store):', err.message);
@@ -145,5 +149,45 @@ module.exports = {
       lead.draft_account_id = accountId;
       writeDB(data);
     }
+  },
+
+  // --- Follow-Up Methods ---
+
+  saveFollowup({ fromAccount, toEmail, originalSubject, originalMessageId, followUpSubject, followUpBody }) {
+    const data = readDB();
+    if (!data.followups) data.followups = [];
+
+    const existing = data.followups.find(f =>
+      f.fromAccount === fromAccount && f.originalMessageId === originalMessageId
+    );
+    if (existing) return existing.id; // Already saved, skip
+
+    const id = 'fu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    data.followups.push({
+      id,
+      fromAccount,
+      toEmail,
+      originalSubject,
+      originalMessageId,
+      followUpSubject,
+      followUpBody,
+      savedAt: new Date().toISOString()
+    });
+
+    writeDB(data);
+    return id;
+  },
+
+  getAllFollowups() {
+    const data = readDB();
+    return data.followups || [];
+  },
+
+  wasFollowupSent(fromAccount, originalMessageId) {
+    const data = readDB();
+    if (!data.followups) return false;
+    return data.followups.some(f =>
+      f.fromAccount === fromAccount && f.originalMessageId === originalMessageId
+    );
   }
 };

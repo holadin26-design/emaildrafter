@@ -956,8 +956,127 @@ ${d.body}`;
     DOM.copyAllBtn.addEventListener('click', () => {
       copyDraftsList(state.drafts, 'All Accounts');
     });
+
+    // --- Follow-Up Engine ---
+    const fuScanBtn = document.getElementById('fu-scan-btn');
+    if (fuScanBtn) {
+      fuScanBtn.addEventListener('click', runFollowUpScan);
+    }
+  }
+
+  // ===========================
+  // AI FOLLOW-UP ENGINE
+  // ===========================
+  async function runFollowUpScan() {
+    const fuScanBtn = document.getElementById('fu-scan-btn');
+    const fuResultsSection = document.getElementById('followup-results-section');
+    const fuSummaryRow = document.getElementById('fu-summary-row');
+    const fuAccountResults = document.getElementById('fu-account-results');
+
+    const apiKey = (document.getElementById('fu-api-key') || {}).value || '';
+    const delayDays = parseInt((document.getElementById('fu-delay-days') || {}).value || '3', 10);
+    const maxEmails = parseInt((document.getElementById('fu-max-emails') || {}).value || '50', 10);
+
+    if (!apiKey) {
+      showToast('Please enter your OpenRouter API key to use AI Follow-Ups.', 'info');
+      return;
+    }
+
+    if (state.accounts.length === 0) {
+      showToast('Please add at least one sender account before scanning.', 'info');
+      return;
+    }
+
+    // Update button to loading state
+    fuScanBtn.disabled = true;
+    fuScanBtn.innerHTML = `<span class="spinner-inline"></span> Scanning & Drafting Follow-Ups... (this may take a few minutes)`;
+
+    try {
+      const imapCredentials = state.accounts.map(acc => ({
+        email: acc.email,
+        password: acc.password,
+        host: acc.host || 'imap.gmail.com',
+        port: acc.port || 993
+      }));
+
+      const resp = await fetch(`${API_BASE_URL}/followups/scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imapCredentials,
+          followUpDelayDays: delayDays,
+          maxEmailsPerAccount: maxEmails,
+          openRouterApiKey: apiKey
+        })
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok || !data.success) {
+        showToast('Follow-up scan failed: ' + (data.error || 'Unknown error'), 'error');
+        return;
+      }
+
+      // Render summary metrics
+      const summary = data.summary || {};
+      fuSummaryRow.innerHTML = `
+        <div class="fu-metric-card">
+          <span class="fu-metric-value">${summary.totalScanned || 0}</span>
+          <span class="fu-metric-label">Sent Emails Scanned</span>
+        </div>
+        <div class="fu-metric-card">
+          <span class="fu-metric-value">${summary.totalCold || 0}</span>
+          <span class="fu-metric-label">Cold Emails Found</span>
+        </div>
+        <div class="fu-metric-card">
+          <span class="fu-metric-value">${summary.totalDrafted || 0}</span>
+          <span class="fu-metric-label">Follow-Ups Drafted</span>
+        </div>
+      `;
+
+      // Render per-account results
+      fuAccountResults.innerHTML = '';
+      (data.accountResults || []).forEach(acc => {
+        const hasErrors = acc.errors && acc.errors.length > 0;
+        const errorsHtml = hasErrors
+          ? `<div class="fu-errors">⚠️ ${acc.errors.slice(0, 3).map(e => escapeHTML(e)).join('<br>')}</div>`
+          : '';
+
+        fuAccountResults.innerHTML += `
+          <div class="fu-account-result">
+            <div class="fu-account-header">
+              <span class="fu-account-email">📧 ${escapeHTML(acc.email)}</span>
+              <div class="fu-account-stats">
+                <span class="fu-stat">Scanned: <span>${acc.emailsScanned}</span></span>
+                <span class="fu-stat warning">Cold: <span>${acc.coldEmailsFound}</span></span>
+                <span class="fu-stat success">Drafted: <span>${acc.followUpsDrafted}</span></span>
+                <span class="fu-stat">Skipped: <span>${acc.skipped || 0}</span></span>
+              </div>
+            </div>
+            ${errorsHtml}
+          </div>
+        `;
+      });
+
+      fuResultsSection.classList.remove('hidden');
+
+      if (summary.totalDrafted > 0) {
+        showToast(`✅ ${summary.totalDrafted} follow-up drafts saved across your Gmail accounts!`, 'success');
+      } else if (summary.totalCold === 0) {
+        showToast(`Scan complete — no cold emails found older than ${delayDays} days.`, 'info');
+      } else {
+        showToast(`Found ${summary.totalCold} cold emails but no follow-ups drafted. Check account errors below.`, 'info');
+      }
+
+    } catch (err) {
+      showToast('Network error during follow-up scan: ' + err.message, 'error');
+    } finally {
+      fuScanBtn.disabled = false;
+      fuScanBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> Scan Sent Emails & Draft AI Follow-Ups`;
+    }
   }
 
   document.addEventListener('DOMContentLoaded', init);
 
 })();
+

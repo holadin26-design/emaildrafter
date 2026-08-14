@@ -868,6 +868,159 @@ body {
   font-size: 0.78rem;
   color: var(--text-dim);
 }
+
+/* === Follow-Up Engine Styles === */
+.followup-card {
+  border-color: rgba(251, 191, 36, 0.4) !important;
+}
+
+.followup-header-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fu-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .fu-config-grid { grid-template-columns: 1fr; }
+}
+
+.fu-scan-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.3) !important;
+}
+
+.fu-scan-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px rgba(245, 158, 11, 0.5) !important;
+}
+
+.fu-scan-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#followup-results-section {
+  margin-top: 20px;
+}
+
+.fu-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.fu-metric-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.fu-metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fbbf24;
+  font-family: var(--font-mono);
+}
+
+.fu-metric-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.fu-account-result {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.fu-account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fu-account-email {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.fu-account-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.fu-stat {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.fu-stat span {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.fu-stat.success span { color: #4ade80; }
+.fu-stat.warning span { color: #fbbf24; }
+
+.fu-errors {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: #f87171;
+  font-family: var(--font-mono);
+  background: rgba(248, 113, 113, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.spinner-inline {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
   </style>
 </head>
 <body>
@@ -1155,6 +1308,64 @@ Best,
         <!-- Scrollable Drafts Feed -->
         <div id="drafts-list" class="drafts-feed">
           <!-- Draft cards rendered here -->
+        </div>
+      </section>
+
+      <!-- Section 8: AI Follow-Up Engine -->
+      <section class="card followup-card">
+        <div class="card-header">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="followup-header-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <div>
+              <h2><span class="step-num" style="background:rgba(245,158,11,0.15);color:#f59e0b;">8</span> AI Follow-Up Engine</h2>
+              <p class="card-desc">Scans your Sent folder, identifies cold emails via AI, drafts personalized follow-ups automatically</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fu-config-grid">
+          <div class="form-group">
+            <label for="fu-api-key">OpenRouter API Key</label>
+            <input type="password" id="fu-api-key" class="form-input" 
+              value=""
+              placeholder="sk-or-v1-..." autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="fu-delay-days">Follow-Up After (days)</label>
+            <select id="fu-delay-days" class="form-input">
+              <option value="2">2 days</option>
+              <option value="3" selected>3 days</option>
+              <option value="5">5 days</option>
+              <option value="7">7 days</option>
+              <option value="10">10 days</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fu-max-emails">Max Emails to Scan per Account</label>
+            <select id="fu-max-emails" class="form-input">
+              <option value="20">20 emails</option>
+              <option value="50" selected>50 emails</option>
+              <option value="100">100 emails</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="fu-scan-btn" class="btn fu-scan-btn btn-lg btn-full" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Scan Sent Emails & Draft AI Follow-Ups
+        </button>
+
+        <!-- Results -->
+        <div id="followup-results-section" class="hidden">
+          <div class="fu-summary-row" id="fu-summary-row"></div>
+          <div id="fu-account-results"></div>
         </div>
       </section>
 
