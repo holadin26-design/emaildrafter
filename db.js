@@ -151,16 +151,33 @@ module.exports = {
     }
   },
 
-  // --- Follow-Up Methods ---
+  // --- Follow-Up Methods (Multi-Step Sequence) ---
 
-  saveFollowup({ fromAccount, toEmail, originalSubject, originalMessageId, followUpSubject, followUpBody }) {
+  // Get follow-up state for an email thread: returns { step, lastFollowupAt } or null
+  getFollowupState(fromAccount, originalMessageId) {
+    const data = readDB();
+    if (!data.followups) return null;
+    const records = data.followups.filter(f =>
+      f.fromAccount === fromAccount && f.originalMessageId === originalMessageId
+    );
+    if (records.length === 0) return null;
+    // Return highest step
+    records.sort((a, b) => b.step - a.step);
+    return { step: records[0].step, lastFollowupAt: records[0].savedAt };
+  },
+
+  // Save a follow-up with its step number (1, 2, or 3)
+  saveFollowup({ fromAccount, toEmail, originalSubject, originalMessageId, followUpSubject, followUpBody, step }) {
     const data = readDB();
     if (!data.followups) data.followups = [];
 
-    const existing = data.followups.find(f =>
-      f.fromAccount === fromAccount && f.originalMessageId === originalMessageId
+    // Prevent duplicate for same step
+    const exists = data.followups.find(f =>
+      f.fromAccount === fromAccount &&
+      f.originalMessageId === originalMessageId &&
+      f.step === step
     );
-    if (existing) return existing.id; // Already saved, skip
+    if (exists) return exists.id;
 
     const id = 'fu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
     data.followups.push({
@@ -171,6 +188,7 @@ module.exports = {
       originalMessageId,
       followUpSubject,
       followUpBody,
+      step: step || 1,
       savedAt: new Date().toISOString()
     });
 
@@ -181,13 +199,5 @@ module.exports = {
   getAllFollowups() {
     const data = readDB();
     return data.followups || [];
-  },
-
-  wasFollowupSent(fromAccount, originalMessageId) {
-    const data = readDB();
-    if (!data.followups) return false;
-    return data.followups.some(f =>
-      f.fromAccount === fromAccount && f.originalMessageId === originalMessageId
-    );
   }
 };

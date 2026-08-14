@@ -12,3 +12,6 @@ npm-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Server scripts with credentials (deploy via SCP only)
+run_followups.sh
